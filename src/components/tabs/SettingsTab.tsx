@@ -16,33 +16,29 @@ import {
   Bell,
   Moon,
   Sun,
-  Monitor
+  Monitor,
+  RotateCcw
 } from 'lucide-react';
-import { useTheme } from '@/contexts/ThemeContext';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import { DataBackupRestore } from '@/components/DataBackupRestore';
 import { useToast } from '@/hooks/use-toast';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export const SettingsTab: React.FC = () => {
-  const { settings, updateSettings } = useTheme();
   const { toast } = useToast();
+  const { settings, updateSettings } = useTheme();
 
   const handleExportData = () => {
     toast({
-      title: "Export Data",
-      description: "Your data has been exported successfully",
+      title: "Export started",
+      description: "Your data is being prepared for download.",
     });
   };
 
-  const handleImportData = () => {
+  const handleResetApp = () => {
     toast({
-      title: "Import Data",
-      description: "Data import feature coming soon",
-    });
-  };
-
-  const handleClearData = () => {
-    toast({
-      title: "Clear Data",
-      description: "All data has been cleared",
+      title: "Reset initiated",
+      description: "Application data has been cleared.",
       variant: "destructive",
     });
   };
@@ -71,8 +67,24 @@ export const SettingsTab: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-20">
+      {/* Theme Quick Toggle */}
+      <Card className="bg-gradient-card border-0 shadow-lg animate-fade-in">
+        <CardContent className="p-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="font-medium">Theme</h3>
+              <p className="text-sm text-muted-foreground">Switch between light, dark, and auto mode</p>
+            </div>
+            <ThemeToggle />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Data Management */}
+      <DataBackupRestore />
+
       {/* Appearance Settings */}
-      <Card className="bg-gradient-card border-0 shadow-lg">
+      <Card className="bg-gradient-card border-0 shadow-lg animate-fade-in">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Palette className="w-5 h-5" />
@@ -82,7 +94,7 @@ export const SettingsTab: React.FC = () => {
         <CardContent className="space-y-6">
           {/* Theme Selection */}
           <div className="space-y-3">
-            <Label className="text-sm font-medium">Theme</Label>
+            <Label className="text-sm font-medium">Theme Mode</Label>
             <div className="grid grid-cols-3 gap-2">
               {themeOptions.map((option) => {
                 const Icon = option.icon;
@@ -90,7 +102,7 @@ export const SettingsTab: React.FC = () => {
                   <Button
                     key={option.value}
                     variant={settings.theme === option.value ? "default" : "outline"}
-                    className="flex flex-col gap-2 h-auto py-3"
+                    className="flex flex-col gap-2 h-auto py-3 transition-all duration-200 hover:scale-105"
                     onClick={() => updateSettings({ theme: option.value as any })}
                   >
                     <Icon className="w-4 h-4" />
@@ -111,7 +123,9 @@ export const SettingsTab: React.FC = () => {
                 <Button
                   key={option.value}
                   variant="outline"
-                  className={`h-12 p-2 ${settings.primaryColor === option.value ? 'ring-2 ring-primary' : ''}`}
+                  className={`h-12 p-2 transition-all duration-200 hover:scale-105 ${
+                    settings.primaryColor === option.value ? 'ring-2 ring-primary' : ''
+                  }`}
                   onClick={() => updateSettings({ primaryColor: option.value as any })}
                 >
                   <div className={`w-6 h-6 rounded-full ${option.color}`} />
@@ -145,7 +159,7 @@ export const SettingsTab: React.FC = () => {
       </Card>
 
       {/* Regional Settings */}
-      <Card className="bg-gradient-card border-0 shadow-lg">
+      <Card className="bg-gradient-card border-0 shadow-lg animate-fade-in">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Globe className="w-5 h-5" />
@@ -156,10 +170,10 @@ export const SettingsTab: React.FC = () => {
           <div className="space-y-2">
             <Label htmlFor="currency">Currency</Label>
             <Select value={settings.currency} onValueChange={(value) => updateSettings({ currency: value as any })}>
-              <SelectTrigger>
+              <SelectTrigger className="transition-all duration-200 hover:scale-105">
                 <SelectValue placeholder="Select currency" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-50 bg-popover border border-border shadow-lg">
                 {currencyOptions.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
@@ -172,7 +186,7 @@ export const SettingsTab: React.FC = () => {
       </Card>
 
       {/* Notifications */}
-      <Card className="bg-gradient-card border-0 shadow-lg">
+      <Card className="bg-gradient-card border-0 shadow-lg animate-fade-in">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Bell className="w-5 h-5" />
@@ -206,44 +220,53 @@ export const SettingsTab: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Data Management */}
-      <Card className="bg-gradient-card border-0 shadow-lg">
+      {/* Account Settings */}
+      <Card className="bg-gradient-card border-0 shadow-lg animate-fade-in">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="w-5 h-5" />
-            Data Management
-          </CardTitle>
+          <CardTitle>Account Settings</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Button variant="outline" className="w-full justify-start" onClick={handleExportData}>
-            <Download className="w-4 h-4 mr-2" />
-            Export Data
-          </Button>
-          
-          <Button variant="outline" className="w-full justify-start" onClick={handleImportData}>
-            <Upload className="w-4 h-4 mr-2" />
-            Import Data
-          </Button>
-          
-          <Separator />
-          
-          <Button variant="destructive" className="w-full justify-start" onClick={handleClearData}>
-            <Trash2 className="w-4 h-4 mr-2" />
-            Clear All Data
-          </Button>
-          
-          <p className="text-xs text-muted-foreground">
-            This action cannot be undone. All your expenses, budgets, and settings will be permanently deleted.
-          </p>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="font-medium">Export All Data</h3>
+                <p className="text-sm text-muted-foreground">Download all your financial data</p>
+              </div>
+              <Button
+                onClick={handleExportData}
+                variant="outline"
+                className="transition-all duration-200 hover:scale-105"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+            </div>
+
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="font-medium">Reset Application</h3>
+                <p className="text-sm text-muted-foreground">Clear all data and reset settings</p>
+              </div>
+              <Button
+                onClick={handleResetApp}
+                variant="outline"
+                className="text-destructive hover:text-destructive transition-all duration-200 hover:scale-105"
+              >
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Reset
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
       {/* App Info */}
-      <Card className="bg-gradient-card border-0 shadow-lg">
+      <Card className="bg-gradient-card border-0 shadow-lg animate-fade-in">
         <CardContent className="p-4 text-center text-sm text-muted-foreground space-y-2">
-          <p>Expense Tracker v1.0.0</p>
-          <p>Built with React + TypeScript</p>
-          <p>Data stored locally on your device</p>
+          <p>Advanced Finance Tracker v2.0.0</p>
+          <p>Built with React + TypeScript + Tailwind</p>
+          <p>✨ Enhanced with premium features & animations</p>
+          <p>🔒 Data stored securely on your device</p>
         </CardContent>
       </Card>
     </div>

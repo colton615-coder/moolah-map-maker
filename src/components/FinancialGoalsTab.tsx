@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React from 'react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Target, Plus, TrendingUp, Calendar, DollarSign, Edit, Trash2 } from 'lucide-react';
+import { Target, Plus, TrendingUp, Calendar, DollarSign, Edit, Trash2, AlertTriangle } from 'lucide-react';
 import { FinancialGoalsDialog } from '@/components/FinancialGoalsDialog';
 import { useIndexedDB } from '@/hooks/useIndexedDB';
 import { useToast } from '@/hooks/use-toast';
@@ -12,8 +12,8 @@ import { format, differenceInDays } from 'date-fns';
 
 export const FinancialGoalsTab: React.FC = () => {
   const [goals, setGoals] = useIndexedDB('financialGoals', []);
-  const [isGoalDialogOpen, setIsGoalDialogOpen] = useState(false);
-  const [editingGoal, setEditingGoal] = useState<any>(null);
+  const [isGoalDialogOpen, setIsGoalDialogOpen] = React.useState(false);
+  const [editingGoal, setEditingGoal] = React.useState<any>(null);
   const { toast } = useToast();
 
   const addGoal = (newGoal: any) => {
@@ -209,7 +209,7 @@ export const FinancialGoalsTab: React.FC = () => {
                     {goal.targetDate && (
                       <div>
                         <p className="text-muted-foreground">Days Left</p>
-                        <p className="font-medium">
+                        <p className={`font-medium ${daysRemaining === 0 ? 'text-destructive' : ''}`}>
                           {daysRemaining !== null ? `${daysRemaining} days` : 'Overdue'}
                         </p>
                       </div>
@@ -278,6 +278,12 @@ export const FinancialGoalsTab: React.FC = () => {
                       <Badge variant="outline">
                         <Calendar className="w-3 h-3 mr-1" />
                         {format(new Date(goal.targetDate), 'MMM dd, yyyy')}
+                      </Badge>
+                    )}
+                    {daysRemaining !== null && daysRemaining <= 7 && daysRemaining > 0 && (
+                      <Badge variant="outline" className="text-warning border-warning">
+                        <AlertTriangle className="w-3 h-3 mr-1" />
+                        Due Soon
                       </Badge>
                     )}
                   </div>

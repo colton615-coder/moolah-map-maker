@@ -1,8 +1,8 @@
 import React from 'react';
-import { BarChart3, Target, Receipt, Settings } from 'lucide-react';
+import { BarChart3, Target, Receipt, TrendingUp, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export type TabType = 'overview' | 'budgets' | 'transactions' | 'settings';
+export type TabType = 'overview' | 'budgets' | 'transactions' | 'goals' | 'settings';
 
 interface TabNavigationProps {
   activeTab: TabType;
@@ -13,6 +13,7 @@ const tabs = [
   { id: 'overview' as const, label: 'Overview', icon: BarChart3 },
   { id: 'budgets' as const, label: 'Budgets', icon: Target },
   { id: 'transactions' as const, label: 'Transactions', icon: Receipt },
+  { id: 'goals' as const, label: 'Goals', icon: TrendingUp },
   { id: 'settings' as const, label: 'Settings', icon: Settings },
 ];
 
@@ -24,8 +25,8 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabCh
         <div 
           className="absolute top-0 h-1 bg-gradient-primary rounded-full transition-all duration-300 ease-out"
           style={{
-            width: '25%',
-            left: `${tabs.findIndex(tab => tab.id === activeTab) * 25}%`,
+            width: '20%',
+            left: `${tabs.findIndex(tab => tab.id === activeTab) * 20}%`,
           }}
         />
         

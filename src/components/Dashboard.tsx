@@ -19,6 +19,8 @@ export const Dashboard = () => {
         return <BudgetsTab />;
       case 'transactions':
         return <AdvancedTransactionsTab />;
+      case 'goals':
+        return <FinancialGoalsTab />;
       case 'settings':
         return <SettingsTab />;
       default:
@@ -43,12 +45,14 @@ export const Dashboard = () => {
                   {activeTab === 'overview' && '💼 Overview'}
                   {activeTab === 'budgets' && '🎯 Budgets'}
                   {activeTab === 'transactions' && '📊 Transactions'}
+                  {activeTab === 'goals' && '🚀 Goals'}
                   {activeTab === 'settings' && '⚙️ Settings'}
                 </h1>
                 <p className="text-sm text-muted-foreground mt-1 animate-slide-up">
                   {activeTab === 'overview' && 'Your financial dashboard'}
                   {activeTab === 'budgets' && 'Manage your spending limits'}
                   {activeTab === 'transactions' && 'Advanced transaction management'}
+                  {activeTab === 'goals' && 'Track your financial achievements'}
                   {activeTab === 'settings' && 'Customize your experience'}
                 </p>
               </div>
