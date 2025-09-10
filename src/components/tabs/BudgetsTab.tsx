@@ -83,8 +83,11 @@ export const BudgetsTab: React.FC = () => {
   };
 
   const handleAddBudget = () => {
+    console.log("Add Budget clicked");
+    alert("Add Budget clicked - checking if dialog opens");
     setEditingBudget(null);
     setIsBudgetDialogOpen(true);
+    console.log("Dialog should be open:", true);
   };
 
   return (

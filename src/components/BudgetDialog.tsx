@@ -33,6 +33,8 @@ export const BudgetDialog = ({ open, onOpenChange, budget, onSave }: BudgetDialo
   const [amount, setAmount] = useState(budget?.budget?.toString() || '');
   const { toast } = useToast();
 
+  console.log("BudgetDialog render - open:", open, "budget:", budget);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -69,7 +71,7 @@ export const BudgetDialog = ({ open, onOpenChange, budget, onSave }: BudgetDialo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] z-50">
         <DialogHeader>
           <DialogTitle>{budget ? 'Edit Budget' : 'Add New Budget'}</DialogTitle>
         </DialogHeader>
