@@ -5,12 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Search, Filter, ArrowUpDown } from 'lucide-react';
-import { useTheme } from '@/contexts/ThemeContext';
 import { AddExpenseDialog } from '@/components/AddExpenseDialog';
 
 export const TransactionsTab: React.FC = () => {
-  const { settings } = useTheme();
-  const currencySymbol = { USD: '$', EUR: '€', GBP: '£', CAD: 'C$', AUD: 'A$' }[settings.currency];
+  const currencySymbol = '$'; // Default to USD for now
   
   const [transactions, setTransactions] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
