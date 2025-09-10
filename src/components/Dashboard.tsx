@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { TabNavigation, type TabType } from "./TabNavigation";
 import { OverviewTab } from "./tabs/OverviewTab";
 import { BudgetsTab } from "./tabs/BudgetsTab";
-import { TransactionsTab } from "./tabs/TransactionsTab";
+import { AdvancedTransactionsTab } from "./AdvancedTransactionsTab";
+import { FinancialGoalsTab } from "./FinancialGoalsTab";
 import { SettingsTab } from "./tabs/SettingsTab";
+import { ThemeToggle } from "./ThemeToggle";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 
 export const Dashboard = () => {
@@ -16,7 +18,7 @@ export const Dashboard = () => {
       case 'budgets':
         return <BudgetsTab />;
       case 'transactions':
-        return <TransactionsTab />;
+        return <AdvancedTransactionsTab />;
       case 'settings':
         return <SettingsTab />;
       default:
@@ -35,18 +37,23 @@ export const Dashboard = () => {
         {/* Header */}
         <header className="sticky top-0 z-40 glass-effect border-b border-white/10">
           <div className="px-6 py-6">
-            <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent animate-fade-in">
-              {activeTab === 'overview' && '💼 Overview'}
-              {activeTab === 'budgets' && '🎯 Budgets'}
-              {activeTab === 'transactions' && '📊 Transactions'}
-              {activeTab === 'settings' && '⚙️ Settings'}
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1 animate-slide-up">
-              {activeTab === 'overview' && 'Your financial dashboard'}
-              {activeTab === 'budgets' && 'Manage your spending limits'}
-              {activeTab === 'transactions' && 'Track your money flow'}
-              {activeTab === 'settings' && 'Customize your experience'}
-            </p>
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent animate-fade-in">
+                  {activeTab === 'overview' && '💼 Overview'}
+                  {activeTab === 'budgets' && '🎯 Budgets'}
+                  {activeTab === 'transactions' && '📊 Transactions'}
+                  {activeTab === 'settings' && '⚙️ Settings'}
+                </h1>
+                <p className="text-sm text-muted-foreground mt-1 animate-slide-up">
+                  {activeTab === 'overview' && 'Your financial dashboard'}
+                  {activeTab === 'budgets' && 'Manage your spending limits'}
+                  {activeTab === 'transactions' && 'Advanced transaction management'}
+                  {activeTab === 'settings' && 'Customize your experience'}
+                </p>
+              </div>
+              <ThemeToggle />
+            </div>
           </div>
         </header>
 
