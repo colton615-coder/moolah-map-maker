@@ -57,15 +57,31 @@ export const DataBackupRestore: React.FC = () => {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const backup = JSON.parse(e.target?.result as string);
         
-        if (!backup.data) {
+        if (!backup.data || !backup.version) {
           throw new Error('Invalid backup file format');
         }
 
-        // In a real app, you would restore to IndexedDB here
+        // Restore data to IndexedDB
+        if (backup.data.transactions) {
+          localStorage.setItem('transactions', JSON.stringify(backup.data.transactions));
+        }
+        if (backup.data.budgets) {
+          localStorage.setItem('budgets', JSON.stringify(backup.data.budgets));
+        }
+        if (backup.data.goals) {
+          localStorage.setItem('financialGoals', JSON.stringify(backup.data.goals));
+        }
+        if (backup.data.recurringTransactions) {
+          localStorage.setItem('recurringTransactions', JSON.stringify(backup.data.recurringTransactions));
+        }
+
+        // Reload the page to reflect changes
+        window.location.reload();
+
         toast({
           title: "Restore successful!",
           description: `Backup from ${new Date(backup.timestamp).toLocaleDateString()} has been restored.`,
