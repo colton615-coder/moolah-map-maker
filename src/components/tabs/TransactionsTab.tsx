@@ -8,97 +8,19 @@ import { Plus, Search, Filter, ArrowUpDown } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { AddExpenseDialog } from '@/components/AddExpenseDialog';
 
-const transactions = [
-  {
-    id: 1,
-    description: 'Grocery Shopping at Whole Foods',
-    amount: 65.50,
-    category: 'Food',
-    date: '2024-03-15',
-    time: '14:30',
-    color: 'food',
-    type: 'expense'
-  },
-  {
-    id: 2,
-    description: 'Salary Deposit',
-    amount: 2000.00,
-    category: 'Income',
-    date: '2024-03-15',
-    time: '09:00',
-    color: 'success',
-    type: 'income'
-  },
-  {
-    id: 3,
-    description: 'Gas Station - Shell',
-    amount: 45.00,
-    category: 'Transport',
-    date: '2024-03-14',
-    time: '18:15',
-    color: 'transport',
-    type: 'expense'
-  },
-  {
-    id: 4,
-    description: 'Netflix Subscription',
-    amount: 15.99,
-    category: 'Entertainment',
-    date: '2024-03-13',
-    time: '12:00',
-    color: 'entertainment',
-    type: 'expense'
-  },
-  {
-    id: 5,
-    description: 'Electricity Bill',
-    amount: 120.00,
-    category: 'Utilities',
-    date: '2024-03-12',
-    time: '16:45',
-    color: 'utilities',
-    type: 'expense'
-  },
-  {
-    id: 6,
-    description: 'Coffee Shop - Starbucks',
-    amount: 8.50,
-    category: 'Food',
-    date: '2024-03-12',
-    time: '08:30',
-    color: 'food',
-    type: 'expense'
-  },
-  {
-    id: 7,
-    description: 'Online Shopping - Amazon',
-    amount: 89.99,
-    category: 'Shopping',
-    date: '2024-03-11',
-    time: '20:15',
-    color: 'shopping',
-    type: 'expense'
-  },
-  {
-    id: 8,
-    description: 'Freelance Payment',
-    amount: 500.00,
-    category: 'Income',
-    date: '2024-03-10',
-    time: '11:30',
-    color: 'success',
-    type: 'income'
-  },
-];
-
 export const TransactionsTab: React.FC = () => {
   const { settings } = useTheme();
   const currencySymbol = { USD: '$', EUR: '€', GBP: '£', CAD: 'C$', AUD: 'A$' }[settings.currency];
   
+  const [transactions, setTransactions] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   const [sortBy, setSortBy] = useState('date');
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
+
+  const addTransaction = (newTransaction: any) => {
+    setTransactions(prev => [newTransaction, ...prev]);
+  };
 
   const filteredTransactions = transactions
     .filter(transaction => {
@@ -248,6 +170,7 @@ export const TransactionsTab: React.FC = () => {
       <AddExpenseDialog 
         open={isAddExpenseOpen} 
         onOpenChange={setIsAddExpenseOpen}
+        onAddTransaction={addTransaction}
       />
     </div>
   );

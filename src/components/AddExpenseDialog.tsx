@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 interface AddExpenseDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onAddTransaction?: (transaction: any) => void;
 }
 
 const categories = [
@@ -25,7 +26,7 @@ const categories = [
   { value: "healthcare", label: "Healthcare", color: "healthcare" },
 ];
 
-export const AddExpenseDialog = ({ open, onOpenChange }: AddExpenseDialogProps) => {
+export const AddExpenseDialog = ({ open, onOpenChange, onAddTransaction }: AddExpenseDialogProps) => {
   const [amount, setAmount] = React.useState("");
   const [description, setDescription] = React.useState("");
   const [category, setCategory] = React.useState("");
@@ -44,7 +45,21 @@ export const AddExpenseDialog = ({ open, onOpenChange }: AddExpenseDialogProps) 
       return;
     }
 
-    // Here you would typically save to a database or state management
+    const newTransaction = {
+      id: Date.now(),
+      description,
+      amount: parseFloat(amount),
+      category,
+      date: format(date, 'yyyy-MM-dd'),
+      time: format(new Date(), 'HH:mm'),
+      color: categories.find(c => c.value === category)?.color || 'primary',
+      type: 'expense'
+    };
+
+    if (onAddTransaction) {
+      onAddTransaction(newTransaction);
+    }
+
     toast({
       title: "Expense added!",
       description: `$${amount} expense for ${description} has been recorded.`,

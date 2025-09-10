@@ -3,56 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-const transactions = [
-  {
-    id: 1,
-    description: "Grocery Shopping",
-    amount: 65.50,
-    category: "Food",
-    date: "2024-03-15",
-    color: "food"
-  },
-  {
-    id: 2,
-    description: "Gas Station",
-    amount: 45.00,
-    category: "Transport",
-    date: "2024-03-14",
-    color: "transport"
-  },
-  {
-    id: 3,
-    description: "Netflix Subscription",
-    amount: 15.99,
-    category: "Entertainment",
-    date: "2024-03-13",
-    color: "entertainment"
-  },
-  {
-    id: 4,
-    description: "Electricity Bill",
-    amount: 120.00,
-    category: "Utilities",
-    date: "2024-03-12",
-    color: "utilities"
-  },
-  {
-    id: 5,
-    description: "Coffee Shop",
-    amount: 8.50,
-    category: "Food",
-    date: "2024-03-12",
-    color: "food"
-  },
-  {
-    id: 6,
-    description: "Online Shopping",
-    amount: 89.99,
-    category: "Shopping",
-    date: "2024-03-11",
-    color: "shopping"
-  },
-];
+const transactions: any[] = [];
 
 export const RecentTransactions = () => {
   return (
