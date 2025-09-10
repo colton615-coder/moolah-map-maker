@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Plus, Edit, AlertTriangle } from 'lucide-react';
-import { useTheme } from '@/contexts/ThemeContext';
 
 const budgetData = [
   { 
@@ -57,8 +56,7 @@ const budgetData = [
 ];
 
 export const BudgetsTab: React.FC = () => {
-  const { settings } = useTheme();
-  const currencySymbol = { USD: '$', EUR: '€', GBP: '£', CAD: 'C$', AUD: 'A$' }[settings.currency];
+  const currencySymbol = '$'; // Default to USD for now
   
   const totalBudget = budgetData.reduce((sum, item) => sum + item.budget, 0);
   const totalSpent = budgetData.reduce((sum, item) => sum + item.spent, 0);
