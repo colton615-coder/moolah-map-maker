@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Plus, Edit, AlertTriangle } from 'lucide-react';
+import { BudgetDialog } from '@/components/BudgetDialog';
+import { useToast } from '@/hooks/use-toast';
 
 const budgetData = [
   { 
@@ -57,10 +59,33 @@ const budgetData = [
 
 export const BudgetsTab: React.FC = () => {
   const currencySymbol = '$'; // Default to USD for now
+  const [budgets, setBudgets] = useState(budgetData);
+  const [isBudgetDialogOpen, setIsBudgetDialogOpen] = useState(false);
+  const [editingBudget, setEditingBudget] = useState<any>(null);
+  const { toast } = useToast();
   
-  const totalBudget = budgetData.reduce((sum, item) => sum + item.budget, 0);
-  const totalSpent = budgetData.reduce((sum, item) => sum + item.spent, 0);
-  const overBudgetItems = budgetData.filter(item => item.spent > item.budget);
+  const totalBudget = budgets.reduce((sum, item) => sum + item.budget, 0);
+  const totalSpent = budgets.reduce((sum, item) => sum + item.spent, 0);
+  const overBudgetItems = budgets.filter(item => item.spent > item.budget);
+
+  const handleSaveBudget = (budgetData: any) => {
+    if (editingBudget) {
+      setBudgets(prev => prev.map(b => b.id === editingBudget.id ? budgetData : b));
+    } else {
+      setBudgets(prev => [...prev, budgetData]);
+    }
+    setEditingBudget(null);
+  };
+
+  const handleEditBudget = (budget: any) => {
+    setEditingBudget(budget);
+    setIsBudgetDialogOpen(true);
+  };
+
+  const handleAddBudget = () => {
+    setEditingBudget(null);
+    setIsBudgetDialogOpen(true);
+  };
 
   return (
     <div className="space-y-6 pb-20">
@@ -74,7 +99,7 @@ export const BudgetsTab: React.FC = () => {
                 {currencySymbol}{totalSpent} of {currencySymbol}{totalBudget} used
               </p>
             </div>
-            <Button size="sm" className="bg-gradient-primary hover:opacity-90">
+            <Button size="sm" className="bg-gradient-primary hover:opacity-90" onClick={handleAddBudget}>
               <Plus className="w-4 h-4 mr-1" />
               Add Budget
             </Button>
@@ -108,7 +133,7 @@ export const BudgetsTab: React.FC = () => {
 
       {/* Budget Categories */}
       <div className="space-y-4">
-        {budgetData.map((item) => {
+        {budgets.map((item) => {
           const percentage = (item.spent / item.budget) * 100;
           const isOverBudget = percentage > 100;
           const remainingAmount = item.budget - item.spent;
@@ -135,7 +160,7 @@ export const BudgetsTab: React.FC = () => {
                         of {currencySymbol}{item.budget}
                       </p>
                     </div>
-                    <Button variant="ghost" size="sm" className="p-1 h-8 w-8">
+                    <Button variant="ghost" size="sm" className="p-1 h-8 w-8" onClick={() => handleEditBudget(item)}>
                       <Edit className="w-4 h-4" />
                     </Button>
                   </div>
@@ -168,6 +193,13 @@ export const BudgetsTab: React.FC = () => {
           );
         })}
       </div>
+
+      <BudgetDialog
+        open={isBudgetDialogOpen}
+        onOpenChange={setIsBudgetDialogOpen}
+        budget={editingBudget}
+        onSave={handleSaveBudget}
+      />
     </div>
   );
 };

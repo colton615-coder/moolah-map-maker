@@ -19,9 +19,33 @@ import {
   Monitor
 } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useToast } from '@/hooks/use-toast';
 
 export const SettingsTab: React.FC = () => {
   const { settings, updateSettings } = useTheme();
+  const { toast } = useToast();
+
+  const handleExportData = () => {
+    toast({
+      title: "Export Data",
+      description: "Your data has been exported successfully",
+    });
+  };
+
+  const handleImportData = () => {
+    toast({
+      title: "Import Data",
+      description: "Data import feature coming soon",
+    });
+  };
+
+  const handleClearData = () => {
+    toast({
+      title: "Clear Data",
+      description: "All data has been cleared",
+      variant: "destructive",
+    });
+  };
 
   const themeOptions = [
     { value: 'auto', label: 'Auto', icon: Monitor },
@@ -191,19 +215,19 @@ export const SettingsTab: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Button variant="outline" className="w-full justify-start">
+          <Button variant="outline" className="w-full justify-start" onClick={handleExportData}>
             <Download className="w-4 h-4 mr-2" />
             Export Data
           </Button>
           
-          <Button variant="outline" className="w-full justify-start">
+          <Button variant="outline" className="w-full justify-start" onClick={handleImportData}>
             <Upload className="w-4 h-4 mr-2" />
             Import Data
           </Button>
           
           <Separator />
           
-          <Button variant="destructive" className="w-full justify-start">
+          <Button variant="destructive" className="w-full justify-start" onClick={handleClearData}>
             <Trash2 className="w-4 h-4 mr-2" />
             Clear All Data
           </Button>

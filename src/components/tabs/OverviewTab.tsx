@@ -2,7 +2,6 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, DollarSign, Target } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from 'recharts';
-import { useTheme } from '@/contexts/ThemeContext';
 
 // Mock data - in real app this would come from your data store
 const monthlyData = [
@@ -31,8 +30,7 @@ const budgetData = [
 ];
 
 export const OverviewTab: React.FC = () => {
-  const { settings } = useTheme();
-  const currencySymbol = { USD: '$', EUR: '€', GBP: '£', CAD: 'C$', AUD: 'A$' }[settings.currency];
+  const currencySymbol = '$'; // Default to USD for now
   
   const totalIncome = 0;
   const totalExpenses = 0;
