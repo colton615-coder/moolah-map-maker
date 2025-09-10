@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Plus, Edit, AlertTriangle } from 'lucide-react';
-import { BudgetDialog } from '@/components/BudgetDialog';
+import { Input } from '@/components/ui/input';
+import { Plus, Edit, AlertTriangle, Check, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const budgetData = [
@@ -60,34 +60,37 @@ const budgetData = [
 export const BudgetsTab: React.FC = () => {
   const currencySymbol = '$'; // Default to USD for now
   const [budgets, setBudgets] = useState(budgetData);
-  const [isBudgetDialogOpen, setIsBudgetDialogOpen] = useState(false);
-  const [editingBudget, setEditingBudget] = useState<any>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editValue, setEditValue] = useState('');
   const { toast } = useToast();
   
   const totalBudget = budgets.reduce((sum, item) => sum + item.budget, 0);
   const totalSpent = budgets.reduce((sum, item) => sum + item.spent, 0);
   const overBudgetItems = budgets.filter(item => item.spent > item.budget);
 
-  const handleSaveBudget = (budgetData: any) => {
-    if (editingBudget) {
-      setBudgets(prev => prev.map(b => b.id === editingBudget.id ? budgetData : b));
-    } else {
-      setBudgets(prev => [...prev, budgetData]);
-    }
-    setEditingBudget(null);
+  const handleStartEdit = (item: any) => {
+    setEditingId(item.id);
+    setEditValue(item.budget.toString());
   };
 
-  const handleEditBudget = (budget: any) => {
-    setEditingBudget(budget);
-    setIsBudgetDialogOpen(true);
+  const handleSaveEdit = (id: number) => {
+    const newValue = parseFloat(editValue) || 0;
+    setBudgets(prev => prev.map(b => 
+      b.id === id 
+        ? { ...b, budget: newValue, lastUpdated: new Date().toLocaleDateString() }
+        : b
+    ));
+    setEditingId(null);
+    setEditValue('');
+    toast({
+      title: "Budget Updated",
+      description: "Budget amount has been saved successfully",
+    });
   };
 
-  const handleAddBudget = () => {
-    console.log("Add Budget clicked");
-    alert("Add Budget clicked - checking if dialog opens");
-    setEditingBudget(null);
-    setIsBudgetDialogOpen(true);
-    console.log("Dialog should be open:", true);
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditValue('');
   };
 
   return (
@@ -102,7 +105,7 @@ export const BudgetsTab: React.FC = () => {
                 {currencySymbol}{totalSpent} of {currencySymbol}{totalBudget} used
               </p>
             </div>
-            <Button size="sm" className="bg-gradient-primary hover:opacity-90" onClick={handleAddBudget}>
+            <Button size="sm" className="bg-gradient-primary hover:opacity-90" onClick={() => toast({title: "Feature Coming Soon", description: "Add new budget categories will be available soon"})}>
               <Plus className="w-4 h-4 mr-1" />
               Add Budget
             </Button>
@@ -156,16 +159,42 @@ export const BudgetsTab: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="text-right">
-                      <p className={`font-bold ${isOverBudget ? 'text-destructive' : 'text-foreground'}`}>
-                        {currencySymbol}{item.spent}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        of {currencySymbol}{item.budget}
-                      </p>
+                      {editingId === item.id ? (
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs">$</span>
+                          <Input
+                            type="number"
+                            value={editValue}
+                            onChange={(e) => setEditValue(e.target.value)}
+                            className="w-20 h-6 text-xs"
+                            autoFocus
+                          />
+                        </div>
+                      ) : (
+                        <>
+                          <p className={`font-bold ${isOverBudget ? 'text-destructive' : 'text-foreground'}`}>
+                            {currencySymbol}{item.spent}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            of {currencySymbol}{item.budget}
+                          </p>
+                        </>
+                      )}
                     </div>
-                    <Button variant="ghost" size="sm" className="p-1 h-8 w-8" onClick={() => handleEditBudget(item)}>
-                      <Edit className="w-4 h-4" />
-                    </Button>
+                    {editingId === item.id ? (
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="sm" className="p-1 h-6 w-6" onClick={() => handleSaveEdit(item.id)}>
+                          <Check className="w-3 h-3" />
+                        </Button>
+                        <Button variant="ghost" size="sm" className="p-1 h-6 w-6" onClick={handleCancelEdit}>
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button variant="ghost" size="sm" className="p-1 h-8 w-8" onClick={() => handleStartEdit(item)}>
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                    )}
                   </div>
                 </div>
                 
@@ -196,13 +225,6 @@ export const BudgetsTab: React.FC = () => {
           );
         })}
       </div>
-
-      <BudgetDialog
-        open={isBudgetDialogOpen}
-        onOpenChange={setIsBudgetDialogOpen}
-        budget={editingBudget}
-        onSave={handleSaveBudget}
-      />
     </div>
   );
 };
