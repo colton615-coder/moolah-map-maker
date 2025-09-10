@@ -9,50 +9,50 @@ const budgetData = [
   { 
     id: 1,
     category: 'Food', 
-    spent: 450, 
-    budget: 600, 
+    spent: 0, 
+    budget: 0, 
     color: 'food',
-    lastUpdated: '2 hours ago'
+    lastUpdated: 'Never'
   },
   { 
     id: 2,
     category: 'Transport', 
-    spent: 200, 
-    budget: 300, 
+    spent: 0, 
+    budget: 0, 
     color: 'transport',
-    lastUpdated: '1 day ago'
+    lastUpdated: 'Never'
   },
   { 
     id: 3,
     category: 'Entertainment', 
-    spent: 250, 
-    budget: 200, 
+    spent: 0, 
+    budget: 0, 
     color: 'entertainment',
-    lastUpdated: '3 hours ago'
+    lastUpdated: 'Never'
   },
   { 
     id: 4,
     category: 'Utilities', 
-    spent: 350, 
-    budget: 400, 
+    spent: 0, 
+    budget: 0, 
     color: 'utilities',
-    lastUpdated: '5 days ago'
+    lastUpdated: 'Never'
   },
   { 
     id: 5,
     category: 'Shopping', 
-    spent: 180, 
-    budget: 250, 
+    spent: 0, 
+    budget: 0, 
     color: 'shopping',
-    lastUpdated: '1 hour ago'
+    lastUpdated: 'Never'
   },
   { 
     id: 6,
     category: 'Healthcare', 
-    spent: 120, 
-    budget: 300, 
+    spent: 0, 
+    budget: 0, 
     color: 'healthcare',
-    lastUpdated: '1 week ago'
+    lastUpdated: 'Never'
   },
 ];
 

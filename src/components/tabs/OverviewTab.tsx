@@ -6,38 +6,38 @@ import { useTheme } from '@/contexts/ThemeContext';
 
 // Mock data - in real app this would come from your data store
 const monthlyData = [
-  { day: '1', income: 0, expenses: 45, balance: 1955 },
-  { day: '2', income: 0, expenses: 32, balance: 1923 },
-  { day: '3', income: 0, expenses: 78, balance: 1845 },
-  { day: '4', income: 0, expenses: 25, balance: 1820 },
-  { day: '5', income: 2000, expenses: 120, balance: 3700 },
-  { day: '6', income: 0, expenses: 89, balance: 3611 },
-  { day: '7', income: 0, expenses: 156, balance: 3455 },
+  { day: '1', income: 0, expenses: 0, balance: 0 },
+  { day: '2', income: 0, expenses: 0, balance: 0 },
+  { day: '3', income: 0, expenses: 0, balance: 0 },
+  { day: '4', income: 0, expenses: 0, balance: 0 },
+  { day: '5', income: 0, expenses: 0, balance: 0 },
+  { day: '6', income: 0, expenses: 0, balance: 0 },
+  { day: '7', income: 0, expenses: 0, balance: 0 },
 ];
 
 const dailyExpenses = [
-  { day: 'Mon', amount: 45 },
-  { day: 'Tue', amount: 32 },
-  { day: 'Wed', amount: 78 },
-  { day: 'Thu', amount: 25 },
-  { day: 'Fri', amount: 120 },
-  { day: 'Sat', amount: 89 },
-  { day: 'Sun', amount: 156 },
+  { day: 'Mon', amount: 0 },
+  { day: 'Tue', amount: 0 },
+  { day: 'Wed', amount: 0 },
+  { day: 'Thu', amount: 0 },
+  { day: 'Fri', amount: 0 },
+  { day: 'Sat', amount: 0 },
+  { day: 'Sun', amount: 0 },
 ];
 
 const budgetData = [
-  { name: 'Spent', value: 1150, color: 'hsl(var(--expense))' },
-  { name: 'Remaining', value: 350, color: 'hsl(var(--success))' },
+  { name: 'Spent', value: 0, color: 'hsl(var(--expense))' },
+  { name: 'Remaining', value: 0, color: 'hsl(var(--success))' },
 ];
 
 export const OverviewTab: React.FC = () => {
   const { settings } = useTheme();
   const currencySymbol = { USD: '$', EUR: '€', GBP: '£', CAD: 'C$', AUD: 'A$' }[settings.currency];
   
-  const totalIncome = 2000;
-  const totalExpenses = 1150;
+  const totalIncome = 0;
+  const totalExpenses = 0;
   const netBalance = totalIncome - totalExpenses;
-  const budgetUsed = (totalExpenses / 1500) * 100; // Assuming 1500 budget
+  const budgetUsed = totalExpenses > 0 ? (totalExpenses / 100) * 100 : 0; // Assuming 100 budget
 
   return (
     <div className="space-y-6 pb-20">
