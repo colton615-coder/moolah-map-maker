@@ -6,16 +6,19 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Plus, Search, Filter, ArrowUpDown, CalendarIcon, Download, Repeat, Target, TrendingUp } from 'lucide-react';
+import { Plus, Search, Filter, ArrowUpDown, CalendarIcon, Download, Repeat, Target, TrendingUp, Edit, Trash2 } from 'lucide-react';
 import { AddExpenseDialog } from '@/components/AddExpenseDialog';
 import { RecurringTransactionDialog } from '@/components/RecurringTransactionDialog';
 import { ExportData } from '@/components/ExportData';
 import { format, isWithinInterval, startOfMonth, endOfMonth, startOfWeek, endOfWeek, startOfYear, endOfYear } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useIndexedDB } from '@/hooks/useIndexedDB';
+import { useToast } from '@/hooks/use-toast';
+import { SwipeableTransaction } from '@/components/SwipeableTransaction';
 
 export const AdvancedTransactionsTab: React.FC = () => {
   const currencySymbol = '$';
+  const { toast } = useToast();
   
   const [transactions, setTransactions] = useIndexedDB('transactions', []);
   const [recurringTransactions, setRecurringTransactions] = useIndexedDB('recurringTransactions', []);
@@ -28,12 +31,12 @@ export const AdvancedTransactionsTab: React.FC = () => {
     from: undefined,
     to: undefined,
   });
-  const [amountRange, setAmountRange] = useState({ min: '', max: '' });
   const [typeFilter, setTypeFilter] = useState('all');
   
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
   const [isRecurringOpen, setIsRecurringOpen] = useState(false);
   const [showExport, setShowExport] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState(null);
 
   const addTransaction = (newTransaction: any) => {
     setTransactions([newTransaction, ...transactions]);
@@ -43,7 +46,20 @@ export const AdvancedTransactionsTab: React.FC = () => {
     setRecurringTransactions([newRecurring, ...recurringTransactions]);
   };
 
-  // Advanced filtering
+  const deleteTransaction = (id: string) => {
+    setTransactions(transactions.filter(t => t.id !== id));
+    toast({
+      title: "Transaction deleted",
+      description: "Transaction has been removed successfully.",
+    });
+  };
+
+  const editTransaction = (transaction: any) => {
+    setEditingTransaction(transaction);
+    setIsAddExpenseOpen(true);
+  };
+
+  // Simplified filtering
   const filteredTransactions = useMemo(() => {
     return transactions
       .filter(transaction => {
@@ -70,15 +86,7 @@ export const AdvancedTransactionsTab: React.FC = () => {
           }
         }
         
-        // Amount range filter
-        let matchesAmount = true;
-        if (amountRange.min || amountRange.max) {
-          const min = parseFloat(amountRange.min) || 0;
-          const max = parseFloat(amountRange.max) || Infinity;
-          matchesAmount = transaction.amount >= min && transaction.amount <= max;
-        }
-        
-        return matchesSearch && matchesCategory && matchesType && matchesDate && matchesAmount;
+        return matchesSearch && matchesCategory && matchesType && matchesDate;
       })
       .sort((a, b) => {
         if (sortBy === 'date') {
@@ -90,15 +98,12 @@ export const AdvancedTransactionsTab: React.FC = () => {
         }
         return 0;
       });
-  }, [transactions, searchTerm, filterCategory, sortBy, dateRange, amountRange, typeFilter]);
+  }, [transactions, searchTerm, filterCategory, sortBy, dateRange, typeFilter]);
 
   // Quick date filters
   const setQuickDateRange = (type: string) => {
     const now = new Date();
     switch (type) {
-      case 'today':
-        setDateRange({ from: now, to: now });
-        break;
       case 'week':
         setDateRange({ from: startOfWeek(now), to: endOfWeek(now) });
         break;
@@ -120,9 +125,9 @@ export const AdvancedTransactionsTab: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-20">
-      {/* Enhanced Summary Cards */}
+      {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-gradient-success border-0 shadow-floating pulse-aurora">
+        <Card className="bg-gradient-success border-0 shadow-floating">
           <CardContent className="p-4 text-center">
             <TrendingUp className="w-6 h-6 mx-auto mb-2 text-success-foreground" />
             <p className="text-sm text-success-foreground/80 mb-1">Income</p>
@@ -153,17 +158,16 @@ export const AdvancedTransactionsTab: React.FC = () => {
         </Card>
       </div>
 
-      {/* Advanced Controls */}
-      <Card className="bg-gradient-card border-0 shadow-lg animate-fade-in">
+      {/* Controls */}
+      <Card className="bg-gradient-card border-0 shadow-lg">
         <CardHeader className="pb-3">
           <div className="flex justify-between items-center flex-wrap gap-3">
-            <CardTitle className="text-lg gradient-text">Advanced Transactions</CardTitle>
+            <CardTitle className="text-lg gradient-text">Transactions</CardTitle>
             <div className="flex gap-2">
               <Button 
                 size="sm"
                 variant="outline"
                 onClick={() => setIsRecurringOpen(true)}
-                className="transition-all duration-200 hover:scale-105"
               >
                 <Repeat className="w-4 h-4 mr-1" />
                 Recurring
@@ -172,7 +176,6 @@ export const AdvancedTransactionsTab: React.FC = () => {
                 size="sm"
                 variant="outline"
                 onClick={() => setShowExport(!showExport)}
-                className="transition-all duration-200 hover:scale-105"
               >
                 <Download className="w-4 h-4 mr-1" />
                 Export
@@ -180,7 +183,7 @@ export const AdvancedTransactionsTab: React.FC = () => {
               <Button 
                 size="sm"
                 onClick={() => setIsAddExpenseOpen(true)}
-                className="bg-gradient-primary hover:opacity-90 button-glow transition-all duration-200 hover:scale-105"
+                className="bg-gradient-primary hover:opacity-90"
               >
                 <Plus className="w-4 h-4 mr-1" />
                 Add
@@ -189,27 +192,23 @@ export const AdvancedTransactionsTab: React.FC = () => {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Search transactions or categories..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 transition-all duration-200 focus:scale-105"
-            />
-          </div>
+          {/* Search and Filters Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+            <div className="relative lg:col-span-2">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Search transactions..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
 
-          {/* Advanced Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             <Select value={filterCategory} onValueChange={setFilterCategory}>
-              <SelectTrigger className="transition-all duration-200 hover:scale-105">
-                <div className="flex items-center gap-2">
-                  <Filter className="w-4 h-4" />
-                  <SelectValue placeholder="Category" />
-                </div>
+              <SelectTrigger>
+                <SelectValue placeholder="Category" />
               </SelectTrigger>
-              <SelectContent className="z-50 bg-popover border border-border shadow-lg">
+              <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
                 <SelectItem value="food">Food</SelectItem>
                 <SelectItem value="transport">Transport</SelectItem>
@@ -223,27 +222,13 @@ export const AdvancedTransactionsTab: React.FC = () => {
             </Select>
 
             <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="transition-all duration-200 hover:scale-105">
+              <SelectTrigger>
                 <SelectValue placeholder="Type" />
               </SelectTrigger>
-              <SelectContent className="z-50 bg-popover border border-border shadow-lg">
+              <SelectContent>
                 <SelectItem value="all">All Types</SelectItem>
                 <SelectItem value="income">Income</SelectItem>
                 <SelectItem value="expense">Expense</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="transition-all duration-200 hover:scale-105">
-                <div className="flex items-center gap-2">
-                  <ArrowUpDown className="w-4 h-4" />
-                  <SelectValue placeholder="Sort by" />
-                </div>
-              </SelectTrigger>
-              <SelectContent className="z-50 bg-popover border border-border shadow-lg">
-                <SelectItem value="date">Date</SelectItem>
-                <SelectItem value="amount">Amount</SelectItem>
-                <SelectItem value="category">Category</SelectItem>
               </SelectContent>
             </Select>
 
@@ -252,7 +237,7 @@ export const AdvancedTransactionsTab: React.FC = () => {
                 <Button
                   variant="outline"
                   className={cn(
-                    "justify-start text-left font-normal transition-all duration-200 hover:scale-105",
+                    "justify-start text-left font-normal",
                     !dateRange.from && !dateRange.to && "text-muted-foreground"
                   )}
                 >
@@ -260,27 +245,26 @@ export const AdvancedTransactionsTab: React.FC = () => {
                   {dateRange.from ? (
                     dateRange.to ? (
                       <>
-                        {format(dateRange.from, "LLL dd")} -{" "}
-                        {format(dateRange.to, "LLL dd")}
+                        {format(dateRange.from, "MMM dd")} - {format(dateRange.to, "MMM dd")}
                       </>
                     ) : (
-                      format(dateRange.from, "LLL dd, y")
+                      format(dateRange.from, "MMM dd")
                     )
                   ) : (
                     <span>Date range</span>
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 z-50 bg-popover border border-border shadow-lg" align="start">
+              <PopoverContent className="w-auto p-0" align="start">
                 <div className="p-3 border-b">
                   <div className="flex gap-2 flex-wrap">
-                    {['today', 'week', 'month', 'year', 'all'].map((period) => (
+                    {['week', 'month', 'year', 'all'].map((period) => (
                       <Button
                         key={period}
                         variant="outline"
                         size="sm"
                         onClick={() => setQuickDateRange(period)}
-                        className="capitalize transition-all duration-200 hover:scale-105"
+                        className="capitalize"
                       >
                         {period}
                       </Button>
@@ -294,70 +278,55 @@ export const AdvancedTransactionsTab: React.FC = () => {
                   selected={dateRange}
                   onSelect={(range: any) => setDateRange(range || { from: undefined, to: undefined })}
                   numberOfMonths={2}
+                  className={cn("p-3 pointer-events-auto")}
                 />
               </PopoverContent>
             </Popover>
           </div>
 
-          {/* Amount Range Filter */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-sm text-muted-foreground mb-1 block">Min Amount</label>
-              <Input
-                type="number"
-                placeholder="0.00"
-                value={amountRange.min}
-                onChange={(e) => setAmountRange(prev => ({ ...prev, min: e.target.value }))}
-                className="transition-all duration-200 focus:scale-105"
-              />
-            </div>
-            <div>
-              <label className="text-sm text-muted-foreground mb-1 block">Max Amount</label>
-              <Input
-                type="number"
-                placeholder="999999.99"
-                value={amountRange.max}
-                onChange={(e) => setAmountRange(prev => ({ ...prev, max: e.target.value }))}
-                className="transition-all duration-200 focus:scale-105"
-              />
+          {/* Sort Controls */}
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-muted-foreground">Sort by:</span>
+            <div className="flex gap-2">
+              {[
+                { value: 'date', label: 'Date' },
+                { value: 'amount', label: 'Amount' },
+                { value: 'category', label: 'Category' }
+              ].map((sort) => (
+                <Button
+                  key={sort.value}
+                  variant={sortBy === sort.value ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSortBy(sort.value)}
+                >
+                  {sort.label}
+                </Button>
+              ))}
             </div>
           </div>
 
-          {/* Active Filters Display */}
-          {(searchTerm || filterCategory !== 'all' || typeFilter !== 'all' || dateRange.from || amountRange.min || amountRange.max) && (
+          {/* Active Filters */}
+          {(searchTerm || filterCategory !== 'all' || typeFilter !== 'all' || dateRange.from) && (
             <div className="flex gap-2 flex-wrap">
               <span className="text-sm text-muted-foreground">Active filters:</span>
               {searchTerm && (
-                <Badge variant="secondary" className="animate-fade-in">
-                  Search: {searchTerm}
-                </Badge>
+                <Badge variant="secondary">Search: {searchTerm}</Badge>
               )}
               {filterCategory !== 'all' && (
-                <Badge variant="secondary" className="animate-fade-in">
-                  Category: {filterCategory}
-                </Badge>
+                <Badge variant="secondary">Category: {filterCategory}</Badge>
               )}
               {typeFilter !== 'all' && (
-                <Badge variant="secondary" className="animate-fade-in">
-                  Type: {typeFilter}
-                </Badge>
+                <Badge variant="secondary">Type: {typeFilter}</Badge>
               )}
-              {(dateRange.from || dateRange.to) && (
-                <Badge variant="secondary" className="animate-fade-in">
-                  Date range active
-                </Badge>
-              )}
-              {(amountRange.min || amountRange.max) && (
-                <Badge variant="secondary" className="animate-fade-in">
-                  Amount: ${amountRange.min || '0'} - ${amountRange.max || '∞'}
-                </Badge>
+              {dateRange.from && (
+                <Badge variant="secondary">Date filtered</Badge>
               )}
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Export Data Card */}
+      {/* Export Data */}
       {showExport && (
         <ExportData 
           transactions={transactions}
@@ -368,74 +337,39 @@ export const AdvancedTransactionsTab: React.FC = () => {
 
       {/* Transactions List */}
       <div className="space-y-3">
-        {filteredTransactions.map((transaction, index) => (
-          <Card 
-            key={transaction.id} 
-            className="bg-gradient-card border-0 shadow-card hover:shadow-card-hover transition-all duration-300 hover:scale-105 animate-fade-in"
-            style={{ animationDelay: `${index * 0.05}s` }}
-          >
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3 flex-1">
-                  <div className={`w-3 h-10 rounded-full bg-${transaction.color} animate-pulse-glow`} />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">{transaction.description}</p>
-                    <div className="flex items-center gap-2 mt-1 flex-wrap">
-                      <p className="text-xs text-muted-foreground">
-                        {transaction.date} at {transaction.time}
-                      </p>
-                      <Badge 
-                        variant="secondary" 
-                        className={`text-xs h-5 transition-all duration-200 hover:scale-110 ${
-                          transaction.type === 'income' ? 'bg-success/20 text-success' : 'bg-destructive/20 text-destructive'
-                        }`}
-                      >
-                        {transaction.category}
-                      </Badge>
-                      <Badge variant="outline" className="text-xs h-5">
-                        {transaction.type}
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-                <div className="text-right ml-3">
-                  <p className={`font-bold text-sm transition-all duration-200 ${
-                    transaction.type === 'income' ? 'text-success' : 'text-destructive'
-                  }`}>
-                    {transaction.type === 'income' ? '+' : '-'}{currencySymbol}{transaction.amount.toFixed(2)}
-                  </p>
-                </div>
-              </div>
+        {filteredTransactions.length === 0 ? (
+          <Card className="bg-gradient-card border-0 shadow-lg">
+            <CardContent className="p-8 text-center">
+              <div className="text-4xl mb-4">📊</div>
+              <p className="text-muted-foreground">No transactions found.</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                {searchTerm || filterCategory !== 'all' || typeFilter !== 'all' || dateRange.from
+                  ? 'Try adjusting your filters.'
+                  : 'Add your first transaction to get started.'
+                }
+              </p>
             </CardContent>
           </Card>
-        ))}
+        ) : (
+          filteredTransactions.map((transaction, index) => (
+            <SwipeableTransaction
+              key={transaction.id}
+              transaction={transaction}
+              onEdit={() => editTransaction(transaction)}
+              onDelete={() => deleteTransaction(transaction.id)}
+              className="animate-fade-in"
+            />
+          ))
+        )}
       </div>
 
-      {filteredTransactions.length === 0 && (
-        <Card className="bg-gradient-card border-0 shadow-lg animate-fade-in">
-          <CardContent className="p-8 text-center">
-            <div className="shimmer w-16 h-16 rounded-full mx-auto mb-4"></div>
-            <p className="text-muted-foreground">No transactions found matching your criteria.</p>
-            <Button 
-              variant="outline" 
-              className="mt-4 transition-all duration-200 hover:scale-105"
-              onClick={() => {
-                setSearchTerm('');
-                setFilterCategory('all');
-                setTypeFilter('all');
-                setDateRange({ from: undefined, to: undefined });
-                setAmountRange({ min: '', max: '' });
-              }}
-            >
-              Clear Filters
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-
-      <AddExpenseDialog 
-        open={isAddExpenseOpen} 
-        onOpenChange={setIsAddExpenseOpen}
+      {/* Dialogs */}
+      <AddExpenseDialog
+        open={isAddExpenseOpen}
+        onOpenChange={(open) => {
+          setIsAddExpenseOpen(open);
+          if (!open) setEditingTransaction(null);
+        }}
         onAddTransaction={addTransaction}
       />
 
