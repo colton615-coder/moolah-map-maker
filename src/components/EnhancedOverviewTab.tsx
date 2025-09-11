@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, TrendingDown, DollarSign, Target, Mic, MicOff } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Target } from 'lucide-react';
 import { EnhancedChart } from '@/components/EnhancedChart';
 import { SpendingAlerts } from '@/components/SpendingAlerts';
 import { useIndexedDB } from '@/hooks/useIndexedDB';
@@ -14,7 +14,6 @@ export const EnhancedOverviewTab: React.FC = () => {
   const [transactions] = useIndexedDB('transactions', []);
   const [budgets] = useIndexedDB('budgets', []);
   const [goals] = useIndexedDB('financialGoals', []);
-  const [isListening, setIsListening] = useState(false);
   const { toast } = useToast();
 
   // Calculate current month data
@@ -39,75 +38,6 @@ export const EnhancedOverviewTab: React.FC = () => {
   const totalBudget = budgets.reduce((sum, b) => sum + b.amount, 0);
   const budgetUsed = totalBudget > 0 ? (totalExpenses / totalBudget) * 100 : 0;
 
-  // Voice input functionality
-  const startVoiceInput = () => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      toast({
-        title: "Voice input not supported",
-        description: "Your browser doesn't support voice recognition.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
-    
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = 'en-US';
-
-    recognition.onstart = () => {
-      setIsListening(true);
-      toast({
-        title: "Listening...",
-        description: "Say something like 'Add 25 dollars for coffee food'",
-      });
-    };
-
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript.toLowerCase();
-      parseVoiceCommand(transcript);
-    };
-
-    recognition.onerror = () => {
-      setIsListening(false);
-      toast({
-        title: "Voice recognition error",
-        description: "Please try again.",
-        variant: "destructive",
-      });
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-
-    recognition.start();
-  };
-
-  const parseVoiceCommand = (transcript: string) => {
-    // Simple parser for "add X dollars for Y category"
-    const addMatch = transcript.match(/add (\d+(?:\.\d{2})?)(?: dollars?)? for (.+?)(?:\s+(food|transport|entertainment|utilities|shopping|healthcare))?$/i);
-    
-    if (addMatch) {
-      const amount = parseFloat(addMatch[1]);
-      const description = addMatch[2].trim();
-      const category = addMatch[3] || 'other';
-      
-      // Here you would typically add the transaction to your store
-      toast({
-        title: "Voice command recognized!",
-        description: `Would add $${amount} expense for "${description}" in ${category} category`,
-      });
-    } else {
-      toast({
-        title: "Command not understood",
-        description: `Heard: "${transcript}". Try: "Add 25 dollars for coffee food"`,
-        variant: "destructive",
-      });
-    }
-  };
 
   // Goal progress summary
   const activeGoals = goals.filter(g => g.progress < 100);
@@ -167,35 +97,6 @@ export const EnhancedOverviewTab: React.FC = () => {
         </Card>
       </div>
 
-      {/* Voice Input */}
-      <Card className="bg-gradient-card border-0 shadow-lg animate-fade-in">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold mb-1">Quick Voice Entry</h3>
-              <p className="text-sm text-muted-foreground">
-                Add expenses by voice: "Add 25 dollars for coffee food"
-              </p>
-            </div>
-            <Button
-              onClick={startVoiceInput}
-              disabled={isListening}
-              className={`transition-all duration-300 hover:scale-105 ${
-                isListening 
-                  ? 'bg-destructive hover:bg-destructive animate-pulse' 
-                  : 'bg-gradient-primary hover:opacity-90'
-              }`}
-            >
-              {isListening ? (
-                <MicOff className="w-4 h-4 mr-2" />
-              ) : (
-                <Mic className="w-4 h-4 mr-2" />
-              )}
-              {isListening ? 'Listening...' : 'Voice Add'}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Goals Summary */}
       {goals.length > 0 && (
