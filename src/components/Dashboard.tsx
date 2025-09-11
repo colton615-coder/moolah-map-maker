@@ -56,7 +56,7 @@ export const Dashboard = () => {
                   {activeTab === 'settings' && 'Customize your experience'}
                 </p>
               </div>
-              <ThemeToggle />
+              {activeTab === 'settings' && <ThemeToggle />}
             </div>
           </div>
         </header>
