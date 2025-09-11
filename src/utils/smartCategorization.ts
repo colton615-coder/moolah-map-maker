@@ -230,11 +230,13 @@ export function getSpendingInsights(transactions: any[]): Array<{
     return acc;
   }, {} as Record<string, number>);
 
-  const totalSpending = Object.values(categorySpending).reduce((sum, amount) => sum + amount, 0);
+  const totalSpending = Object.values(categorySpending).reduce((sum: number, amount: number) => sum + amount, 0);
   
   // Find dominant categories
   Object.entries(categorySpending).forEach(([category, amount]) => {
-    const percentage = (amount / totalSpending) * 100;
+    const numAmount = Number(amount);
+    const numTotalSpending = Number(totalSpending);
+    const percentage = numTotalSpending > 0 ? (numAmount / numTotalSpending) * 100 : 0;
     
     if (percentage > 40) {
       insights.push({
@@ -254,9 +256,9 @@ export function getSpendingInsights(transactions: any[]): Array<{
     return acc;
   }, {} as Record<string, number>);
 
-  const amounts = Object.values(dailySpending);
-  const avgDaily = amounts.reduce((sum, amount) => sum + amount, 0) / amounts.length;
-  const spikes = Object.entries(dailySpending).filter(([, amount]) => amount > avgDaily * 2);
+  const amounts: number[] = Object.values(dailySpending);
+  const avgDaily = amounts.reduce((sum: number, amount: number) => sum + amount, 0) / amounts.length;
+  const spikes = Object.entries(dailySpending).filter(([, amount]) => Number(amount) > avgDaily * 2);
 
   if (spikes.length > 0) {
     insights.push({
