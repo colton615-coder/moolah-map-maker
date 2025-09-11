@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -15,6 +16,8 @@ interface AddExpenseDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAddTransaction?: (transaction: any) => void;
+  editTransaction?: any;
+  onCreateRecurring?: (transaction: any) => void;
 }
 
 const categories = [
@@ -26,12 +29,34 @@ const categories = [
   { value: "healthcare", label: "Healthcare", color: "healthcare" },
 ];
 
-export const AddExpenseDialog = ({ open, onOpenChange, onAddTransaction }: AddExpenseDialogProps) => {
+export const AddExpenseDialog = ({ open, onOpenChange, onAddTransaction, editTransaction, onCreateRecurring }: AddExpenseDialogProps) => {
   const [amount, setAmount] = React.useState("");
   const [description, setDescription] = React.useState("");
   const [category, setCategory] = React.useState("");
   const [date, setDate] = React.useState<Date>(new Date());
+  const [type, setType] = React.useState("expense");
+  const [makeRecurring, setMakeRecurring] = React.useState(false);
   const { toast } = useToast();
+
+  // Populate form when editing
+  React.useEffect(() => {
+    if (editTransaction) {
+      setAmount(editTransaction.amount.toString());
+      setDescription(editTransaction.description);
+      setCategory(editTransaction.category);
+      setDate(new Date(editTransaction.date));
+      setType(editTransaction.type || "expense");
+      setMakeRecurring(false);
+    } else {
+      // Reset form for new transaction
+      setAmount("");
+      setDescription("");
+      setCategory("");
+      setDate(new Date());
+      setType("expense");
+      setMakeRecurring(false);
+    }
+  }, [editTransaction, open]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,24 +70,39 @@ export const AddExpenseDialog = ({ open, onOpenChange, onAddTransaction }: AddEx
       return;
     }
 
-    const newTransaction = {
-      id: Date.now(),
+    const transactionData = {
+      id: editTransaction?.id || Date.now(),
       description,
       amount: parseFloat(amount),
       category,
       date: format(date, 'yyyy-MM-dd'),
-      time: format(new Date(), 'HH:mm'),
+      time: editTransaction?.time || format(new Date(), 'HH:mm'),
       color: categories.find(c => c.value === category)?.color || 'primary',
-      type: 'expense'
+      type
     };
 
     if (onAddTransaction) {
-      onAddTransaction(newTransaction);
+      onAddTransaction(transactionData);
+    }
+
+    // Create recurring transaction if checkbox is checked
+    if (makeRecurring && onCreateRecurring) {
+      const recurringData = {
+        id: Date.now() + 1,
+        description,
+        amount: parseFloat(amount),
+        category,
+        type,
+        frequency: 'monthly',
+        nextDate: format(date, 'yyyy-MM-dd'),
+        isActive: true
+      };
+      onCreateRecurring(recurringData);
     }
 
     toast({
-      title: "Expense added!",
-      description: `$${amount} expense for ${description} has been recorded.`,
+      title: editTransaction ? "Transaction updated!" : `${type === 'expense' ? 'Expense' : 'Income'} added!`,
+      description: `$${amount} ${type} for ${description} has been ${editTransaction ? 'updated' : 'recorded'}.${makeRecurring ? ' Created as recurring.' : ''}`,
     });
 
     // Reset form
@@ -70,6 +110,8 @@ export const AddExpenseDialog = ({ open, onOpenChange, onAddTransaction }: AddEx
     setDescription("");
     setCategory("");
     setDate(new Date());
+    setType("expense");
+    setMakeRecurring(false);
     onOpenChange(false);
   };
 
@@ -77,9 +119,22 @@ export const AddExpenseDialog = ({ open, onOpenChange, onAddTransaction }: AddEx
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add New Expense</DialogTitle>
+          <DialogTitle>{editTransaction ? 'Edit Transaction' : 'Add New Transaction'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label>Type *</Label>
+            <Select value={type} onValueChange={setType} required>
+              <SelectTrigger>
+                <SelectValue placeholder="Select type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="expense">Expense</SelectItem>
+                <SelectItem value="income">Income</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="amount">Amount *</Label>
             <div className="relative">
@@ -154,6 +209,17 @@ export const AddExpenseDialog = ({ open, onOpenChange, onAddTransaction }: AddEx
             </Popover>
           </div>
 
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="recurring"
+              checked={makeRecurring}
+              onCheckedChange={(checked) => setMakeRecurring(checked === true)}
+            />
+            <Label htmlFor="recurring" className="text-sm">
+              Make this a recurring monthly {type}
+            </Label>
+          </div>
+
           <div className="flex justify-end space-x-2 pt-4">
             <Button 
               type="button" 
@@ -166,7 +232,7 @@ export const AddExpenseDialog = ({ open, onOpenChange, onAddTransaction }: AddEx
               type="submit" 
               className="bg-gradient-primary hover:opacity-90"
             >
-              Add Expense
+              {editTransaction ? 'Update Transaction' : `Add ${type === 'expense' ? 'Expense' : 'Income'}`}
             </Button>
           </div>
         </form>

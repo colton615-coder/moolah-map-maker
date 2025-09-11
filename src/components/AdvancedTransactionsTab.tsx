@@ -59,6 +59,22 @@ export const AdvancedTransactionsTab: React.FC = () => {
     setIsAddExpenseOpen(true);
   };
 
+  const updateTransaction = (updatedTransaction: any) => {
+    if (editingTransaction) {
+      // Update existing transaction
+      setTransactions(transactions.map(t => 
+        t.id === updatedTransaction.id ? updatedTransaction : t
+      ));
+      toast({
+        title: "Transaction updated",
+        description: "Transaction has been updated successfully.",
+      });
+    } else {
+      // Add new transaction
+      addTransaction(updatedTransaction);
+    }
+  };
+
   // Simplified filtering
   const filteredTransactions = useMemo(() => {
     return transactions
@@ -370,7 +386,9 @@ export const AdvancedTransactionsTab: React.FC = () => {
           setIsAddExpenseOpen(open);
           if (!open) setEditingTransaction(null);
         }}
-        onAddTransaction={addTransaction}
+        onAddTransaction={updateTransaction}
+        editTransaction={editingTransaction}
+        onCreateRecurring={addRecurringTransaction}
       />
 
       <RecurringTransactionDialog
